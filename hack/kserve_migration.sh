@@ -3,6 +3,7 @@
 
 set -o errexit
 
+export KSERVE_VERSION=v0.7.0-rc0
 export CONFIG_DIR="config"
 export ISVC_CONFIG_DIR="${CONFIG_DIR}/isvc"
 export KSVC_CONFIG_DIR="${CONFIG_DIR}/ksvc"
@@ -48,7 +49,6 @@ isControllerRunning kfserving-system
 # Get inference services config
 echo "getting inference services config"
 inference_services=$(kubectl get isvc -A -o jsonpath='{.items[*].metadata.namespace},{.items[*].metadata.name}')
-echo "inference services: ${inference_services}"
 declare -a isvc_names
 declare -a isvc_ns
 if [ ! -z "$inference_services" ]; then
@@ -66,7 +66,6 @@ done
 # Get knative services names
 echo "getting knative services"
 knative_services=$(kubectl get ksvc -A -o jsonpath='{.items[*].metadata.namespace},{.items[*].metadata.name}')
-echo "knative services: ${knative_services}"
 declare -a ksvc_names;
 declare -a ksvc_ns;
 if [ ! -z "$knative_services" ]; then
@@ -85,8 +84,10 @@ fi
 # Deploy kserve
 echo "deploying kserve"
 cd ..
+# KSERVE_CONFIG=kfserving.yaml
+# if [ ${KSERVE_VERSION:3:1} -gt 6 ]; then KSERVE_CONFIG=kserve.yaml; fi
 # TODO: once release version is ready, deploy kserve from release version config.
-# for i in 1 2 3 4 5 ; do kubectl apply -f install/${KSERVE_VERSION}/kfserving.yaml && break || sleep 15; done
+# for i in 1 2 3 4 5 ; do kubectl apply -f install/${KSERVE_VERSION}/${KSERVE_CONFIG} && break || sleep 15; done
 make deploy-dev
 kubectl wait --for=condition=ready --timeout=120s po --all -n kserve
 isControllerRunning kserve
@@ -105,7 +106,6 @@ sleep 5
 
 # Deploy inference services on kserve
 echo "deploying inference services on kserve"
-sed -i -- 's/kubeflow.org/kserve.io/g' ${ISVC_CONFIG_DIR}/*
 for (( i=0; i<${isvc_count}; i++ ));
 do
     yq d -i "${ISVC_CONFIG_DIR}/${isvc_names[$i]}.yaml" 'metadata.annotations'
@@ -115,6 +115,7 @@ do
     yq d -i "${ISVC_CONFIG_DIR}/${isvc_names[$i]}.yaml" 'metadata.resourceVersion'
     yq d -i "${ISVC_CONFIG_DIR}/${isvc_names[$i]}.yaml" 'metadata.uid'
     yq d -i "${ISVC_CONFIG_DIR}/${isvc_names[$i]}.yaml" 'status'
+    sed -i -- 's/kubeflow.org/kserve.io/g' ${ISVC_CONFIG_DIR}/${isvc_names[$i]}.yaml
     kubectl apply -f "${ISVC_CONFIG_DIR}/${isvc_names[$i]}.yaml"
 done
 sleep 300
