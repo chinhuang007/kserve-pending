@@ -3,7 +3,7 @@ Transformer is an `InferenceService` component which does pre/post processing al
 
 ## Setup
 
-1. Your ~/.kube/config should point to a cluster with [KFServing installed](https://github.com/kubeflow/kfserving/#install-kfserving).
+1. Your ~/.kube/config should point to a cluster with [KServe installed](https://github.com/kserve/kserve/#installation).
 2. Your cluster's Istio Ingress gateway must be [network accessible](https://istio.io/latest/docs/tasks/traffic-management/ingress/ingress-control/).
 3. Your Feast online store is populated with driver [data](https://github.com/tedhtchang/populate_feast_online_store/blob/main/driver_stats.parquet), instructions available [here](https://github.com/tedhtchang/populate_feast_online_store), and network accessible.
 
@@ -70,13 +70,13 @@ Expected Output
 >
 * upload completely sent off: 57 out of 57 bytes
 < HTTP/1.1 200 OK
-< content-length: 117
+< content-length: 119
 < content-type: application/json; charset=UTF-8
-< date: Thu, 27 May 2021 00:34:21 GMT
+< date: Thu, 02 Sep 2021 19:27:55 GMT
 < server: istio-envoy
-< x-envoy-upstream-service-time: 47
+< x-envoy-upstream-service-time: 30
 <
 * Connection #0 to host 1.2.3.4 left intact
-{"predictions": [1.8440737040128852, 1.7381656744054226, 3.6771303027855993, 2.241143189554492, 0.06753551272342406]}
+{"predictions": [-1.7783805127914718, 2.7682636004737162, 3.8109928578957977, 0.31319656700671317, 0.7741179292417257]}
 ```
 
